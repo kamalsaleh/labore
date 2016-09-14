@@ -146,19 +146,19 @@ end );
 # Example of a two sided equation over Q[ x,y ]
 
 S := HomalgFieldOfRationalsInSingular()*"x,y";;
-A := HomalgMatrix( [ [ "x,y,x-y,4*x"] ], 2,2, S );
+A := HomalgMatrix( [ [ "x,y,x-y,4*x"] ], 2, 2, S );
 #! <A 2 x 2 matrix over an external ring>
 Display( A );
 #! x,  y, 
 #! x-y,4*x
 
-B := HomalgMatrix( [ [ "x*y,x,x+y,y"] ], 2,2, S );
+B := HomalgMatrix( [ [ "x*y,x,x+y,y"] ], 2, 2, S );
 #! <A 2 x 2 matrix over an external ring>
 Display( B );
 #! x*y, x
 #! x+y, y
 
-C := HomalgMatrix( [ [ "2*x^2*y+2*x*y+2*y^2,2*x^2+2*y^2,2*x^2*y-2*x*y^2+8*x^2+8*x*y,2*x^2+6*x*y" ] ], 2,2, S );
+C := HomalgMatrix( [ [ "2*x^2*y+2*x*y+2*y^2,2*x^2+2*y^2,2*x^2*y-2*x*y^2+8*x^2+8*x*y,2*x^2+6*x*y" ] ], 2, 2, S );
 #! <A 2 x 2 matrix over an external ring>
 Display( C );
 #! 2*x^2*y+2*x*y+2*y^2,        2*x^2+2*y^2,
@@ -182,11 +182,11 @@ Display( YY );
 
 ## Example of a two sided equation over Z
 
-R := HomalgRingOfIntegers();
+R := HomalgRingOfIntegers( );
 #! Z
-B := HomalgMatrix( [ [ 3, 12, 40 ],[ 35 , 6, 81 ] ], 2,3, R );
+B := HomalgMatrix( [ [ 3, 12, 40 ], [ 35 , 6, 81 ] ], 2, 3, R );
 #! <A 2 x 3 matrix over an internal ring>
-A := HomalgMatrix( [ [ 2, 3 ],[ 4, 5 ], [ 65,8 ] ], 3,2, R ); 
+A := HomalgMatrix( [ [ 2, 3 ],[ 4, 5 ], [ 65, 8 ] ], 3, 2, R ); 
 #! <A 3 x 2 matrix over an internal ring>
 Display( A );
 [ [   2,   3 ],
@@ -195,7 +195,7 @@ Display( A );
 Display( B );
 [ [   3,  12,  40 ],
   [  35,   6,  81 ] ]
-C := A*B+ A*B;
+C := A * B+ A * B;
 #! <An unevaluated 3 x 3 matrix over an internal ring>
 Display( C );
 #! [ [   222,    84,   646 ],
@@ -207,7 +207,7 @@ XX := sol[ 1 ];
 #! <An unevaluated 2 x 3 matrix over an internal ring>
 YY := sol[ 2 ];
 #! <An unevaluated 3 x 2 matrix over an internal ring>
-Display( A*XX + YY*B );
+Display( A * XX + YY * B );
 #! [ [   222,    84,   646 ],
 #!  [   374,   156,  1130 ],
 #!  [   950,  1656,  6496 ] ]
