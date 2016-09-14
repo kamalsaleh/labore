@@ -143,7 +143,7 @@ end );
 
 
 
-# Example
+# Example of a two sided equation over Q[ x,y ]
 
 S := HomalgFieldOfRationalsInSingular()*"x,y";;
 A := HomalgMatrix( [ [ "x,y,x-y,4*x"] ], 2,2, S );
@@ -180,6 +180,44 @@ Display( YY );
 #! 0,8*x 
 
 
+## Example of a two sided equation over Z
+
+R := HomalgRingOfIntegers();
+#! Z
+B := HomalgMatrix( [ [ 3, 12, 40 ],[ 35 , 6, 81 ] ], 2,3, R );
+#! <A 2 x 3 matrix over an internal ring>
+A := HomalgMatrix( [ [ 2, 3 ],[ 4, 5 ], [ 65,8 ] ], 3,2, R ); 
+#! <A 3 x 2 matrix over an internal ring>
+Display( A );
+[ [   2,   3 ],
+  [   4,   5 ],
+  [  65,   8 ] ]
+Display( B );
+[ [   3,  12,  40 ],
+  [  35,   6,  81 ] ]
+C := A*B+ A*B;
+#! <An unevaluated 3 x 3 matrix over an internal ring>
+Display( C );
+#! [ [   222,    84,   646 ],
+#!  [   374,   156,  1130 ],
+#!  [   950,  1656,  6496 ] ]
+sol := SolveTwoSidedEquationSystemOverCommutativeRing( A, B, C );
+#! [ <An unevaluated 2 x 3 matrix over an internal ring>, <An unevaluated 3 x 2 matrix over an internal ring> ]
+XX := sol[ 1 ];
+#! <An unevaluated 2 x 3 matrix over an internal ring>
+YY := sol[ 2 ];
+#! <An unevaluated 3 x 2 matrix over an internal ring>
+Display( A*XX + YY*B );
+#! [ [   222,    84,   646 ],
+#!  [   374,   156,  1130 ],
+#!  [   950,  1656,  6496 ] ]
+Display( XX );
+#! [ [    422379692,   -578496624,   -895867312 ],
+#!  [  -3845376046,   3046120608,   1765040492 ] ]
+Display( YY );
+#! [ [   -854467938,    378707794 ],
+#!  [  -1386332698,    619895998 ],
+#!  [   1102776446,            0 ] ] 
 
 
 
