@@ -30,21 +30,7 @@ if Length( l ) = 0 then
   
 fi;
 
-if not ForAll( l, IsHomalgMatrix ) then 
-
-  Error( "The list should contain only homalg matrices" );
-  
-fi;
-
-current_mat := CertainRows( l[ 1 ], [ ] );
-
-for mat in l do
-
-current_mat := UnionOfRows( current_mat, mat );
-
-od;
-
-return current_mat;
+return Iterated( l, UnionOfRows );
 
 end );
                   
@@ -60,21 +46,7 @@ if Length( l ) = 0 then
   
 fi;
 
-if not ForAll( l, IsHomalgMatrix ) then 
-
-  Error( "The list should contain only homalg matrices" );
-  
-fi;
-
-current_mat := CertainColumns( l[ 1 ], [ ] );
-
-for mat in l do
-
-current_mat := UnionOfColumns( current_mat, mat );
-
-od;
-
-return current_mat;
+return Iterated( l, UnionOfColumns );
 
 end );
 
@@ -136,9 +108,10 @@ InstallMethod( SolveTwoSidedEquationSystemOverCommutativeRing,
 
   AA := KroneckerMat( HomalgIdentityMatrix( s, R ), A );
   
-  ## Here it works only for commutative rings...
+##### Here it works only for commutative rings...
   BB := KroneckerMat( HomalgTransposedMat( B ), HomalgIdentityMatrix( r, R ) );
-  
+#####
+
   AABB := UnionOfColumns( AA, BB );
   
   CC := UnionOfRows( List( [ 1 .. s ], i-> CertainColumns( C, [ i ] ) ) );
@@ -170,16 +143,42 @@ end );
 
 
 # Example
-QQ := HomalgFieldOfRationalsInSingular()*"x,y,z,w";
-S := KoszulDualRing( QQ );
 
-A := HomalgMatrix( [ [ "e0,e1,e2,1" ] ], 2,2, S );
-B := HomalgMatrix( [ [ "e2,e1,e3,5*e0-e0*e3" ] ], 2,2, S );
+S := HomalgFieldOfRationalsInSingular()*"x,y";;
+A := HomalgMatrix( [ [ "x,y,x-y,4*x"] ], 2,2, S );
+#! <A 2 x 2 matrix over an external ring>
+Display( A );
+#! x,  y, 
+#! x-y,4*x
 
-XX := B;
-YY := A*A;
+B := HomalgMatrix( [ [ "x*y,x,x+y,y"] ], 2,2, S );
+#! <A 2 x 2 matrix over an external ring>
+Display( B );
+#! x*y, x
+#! x+y, y
 
-C:= A*XX + YY*B;
+C := HomalgMatrix( [ [ "2*x^2*y+2*x*y+2*y^2,2*x^2+2*y^2,2*x^2*y-2*x*y^2+8*x^2+8*x*y,2*x^2+6*x*y" ] ], 2,2, S );
+#! <A 2 x 2 matrix over an external ring>
+Display( C );
+#! 2*x^2*y+2*x*y+2*y^2,        2*x^2+2*y^2,
+#! 2*x^2*y-2*x*y^2+8*x^2+8*x*y,2*x^2+6*x*y
+
+sol := SolveTwoSidedEquationSystemOverCommutativeRing( A, B, C );
+#! [ <An unevaluated 2 x 2 matrix over an external ring>, <An unevaluated 2 x 2 matrix over an external ring> ]
+XX := sol[ 1 ];
+#! <An unevaluated 2 x 2 matrix over an external ring>
+YY := sol[ 2 ];
+#! <An unevaluated 2 x 2 matrix over an external ring>
+A * XX + YY * B = C;
+#! true
+Display( XX );
+#! 2*x*y,2*x,
+#! 0,    0   
+Display( YY );
+#! 0,2*y,
+#! 0,8*x 
+
+
 
 
 
