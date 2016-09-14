@@ -118,15 +118,16 @@ InstallMethod( SolveTwoSidedEquationSystemOverCommutativeRing,
   
   sol:= LeftDivide( AABB, CC );
   
-  m := NrColumns( A );
-  
-  n := NrRows( B );
-  
   if sol = fail then 
   
      return fail;
      
   else
+  
+     
+     m := NrColumns( A );
+  
+     n := NrRows( B );
   
      return  
            [
