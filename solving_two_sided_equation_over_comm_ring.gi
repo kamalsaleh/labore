@@ -83,7 +83,7 @@ InstallMethod( HomalgTransposedMat,
   
 ##
 InstallMethod( SolveTwoSidedEquationSystemOverCommutativeRing,
-                "returns fail or a matrix X such that AX+YB=C, for some forgotten matrix Y",
+                "returns fail or a list of matrices [ X, Y ] such that A*X+Y*B=C",
                [ IsHomalgMatrix, IsHomalgMatrix, IsHomalgMatrix ],
 
   function( A, B, C )
