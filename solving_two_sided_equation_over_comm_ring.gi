@@ -1,4 +1,6 @@
 
+# Read( "/usr/local/lib/gap4r8/local/labore/solving_two_sided_equation_over_comm_ring.gi" );
+
 
 LoadPackage( "ModulePresen" );
 
@@ -57,28 +59,11 @@ end );
 
 InstallMethod( HomalgTransposedMat, 
                 [ IsHomalgMatrix ], 
-  function( M )
- local list_of_rows, list_of_col_in_transposed_mat,m,n;
+function( M )
+  
+  return HomalgMatrix( String( TransposedMat( EntriesOfHomalgMatrixAsListList( M ) ) ), NrColumns( M ), NrRows( M ), HomalgRing( M ) );
  
- m := NrRows( M );
- n := NrColumns( M );
- 
- list_of_rows := List( [ 1 .. m ], i-> CertainRows( M, [ i ] ) );
- 
- list_of_col_in_transposed_mat := List( list_of_rows, function( row )
-                                          
-                                          local list_of_columns_in_this_row, column;
-
-                                          list_of_columns_in_this_row := List( [ 1 .. n ], j-> CertainColumns( row, [ j ] ) );
-                                          
-                                          column := UnionOfRows( list_of_columns_in_this_row );
-                                          
-                                          return column;
-                                          
-                                          end );
- return UnionOfColumns( list_of_col_in_transposed_mat );
- 
- end );
+end );
                                           
   
 ##
@@ -189,12 +174,12 @@ B := HomalgMatrix( [ [ 3, 12, 40 ], [ 35 , 6, 81 ] ], 2, 3, R );
 A := HomalgMatrix( [ [ 2, 3 ],[ 4, 5 ], [ 65, 8 ] ], 3, 2, R ); 
 #! <A 3 x 2 matrix over an internal ring>
 Display( A );
-[ [   2,   3 ],
-  [   4,   5 ],
-  [  65,   8 ] ]
+#! [ [   2,   3 ],
+#!  [   4,   5 ],
+#!  [  65,   8 ] ]
 Display( B );
-[ [   3,  12,  40 ],
-  [  35,   6,  81 ] ]
+#! [ [   3,  12,  40 ],
+#!  [  35,   6,  81 ] ]
 C := A * B+ A * B;
 #! <An unevaluated 3 x 3 matrix over an internal ring>
 Display( C );

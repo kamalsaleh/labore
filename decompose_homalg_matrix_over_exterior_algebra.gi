@@ -1,4 +1,6 @@
 
+# Read( "/usr/local/lib/gap4r8/local/labore/solving_two_sided_equation_over_comm_ring.gi" );
+# Read( "/usr/local/lib/gap4r8/local/labore/decompose_homalg_matrix_over_exterior_algebra.gi" );
 
 LoadPackage( "ModulePresen" );
 LoadPackage( "RingsForHomalg" );
@@ -107,10 +109,10 @@ return coeff_list;
 
 end );
 
-DeclareGlobalFunction( "DecomposeHomalgMat" );
+DeclareAttribute( "DecompositionOfHomalgMat", IsHomalgMatrix );
 
-InstallGlobalFunction( DecomposeHomalgMat, 
-
+InstallMethod( DecompositionOfHomalgMat, 
+                 [ IsHomalgMatrix ],
 function( d )
 local R, n, l, coeff_list, dd, reduction_element, coeff_element, dd_new, u,v, M, m,r;
 
@@ -169,7 +171,7 @@ d := RingElementConstructor( R )( "0", R );
 
 for i in l do                                     
 
-  d := d + Random( [ -100..100 ] )*RingElement( i, R );
+  d := d + Random( [ -10..10 ] )*RingElement( i, R );
 
 od;
 
@@ -188,17 +190,159 @@ return HomalgMatrix( List( [ 1..m ], i-> List( [ 1..n ], j-> RandomRingElement( 
 end );
 
 
+DeclareGlobalFunction( "FLeft" );
+InstallGlobalFunction( FLeft,
+
+function( sigma, A )
+local S,n, basis_indices, zero_matrix,d, e_sigma;
+
+S := A!.ring;
+n := Length( IndeterminatesOfExteriorRing( S ) )-1;
+basis_indices := MyList( n );
+
+d := DecompositionOfHomalgMat( A );
+
+zero_matrix := A - A;
+
+e_sigma := RingElement( sigma, S );
+
+return Iterated( List( basis_indices, function( tau )
+                            local lambda, m;
+                            
+                            if ( not IsSubset( sigma, tau ) ) or ( IsSubset( tau, sigma ) and Length( tau ) > Length( sigma ) ) then 
+                            
+                                return zero_matrix;
+                                
+                            fi;
+                            
+                            if tau = sigma then 
+                            
+                                return d[ 1 ][ 2 ];
+                                
+                            fi;
+                            
+                            lambda := ShallowCopy( sigma );
+                            
+                            SubtractSet( lambda, tau );
+                            
+                            m := Position( basis_indices, lambda );
+                            
+                            return  ( ( RingElement( lambda, S )* RingElement( tau, S ) )/e_sigma )*d[ m ][ 2 ];
+                            
+                            end ), UnionOfColumns );
+                     
+end );
+                     
+                     
+
+DeclareGlobalFunction( "FRight" );
+InstallGlobalFunction( FRight,
+
+function( sigma, A )
+local S,n, basis_indices, zero_matrix,d, e_sigma;
+
+S := A!.ring;
+n := Length( IndeterminatesOfExteriorRing( S ) )-1;
+basis_indices := MyList( n );
+
+d := DecompositionOfHomalgMat( A );
+
+zero_matrix := HomalgZeroMatrix( NrRows( A ), NrColumns( A ), S );
+
+e_sigma := RingElement( sigma, S );
+
+return Iterated( List( basis_indices, function( tau )
+                            local lambda, m;
+                            
+                            if ( not IsSubset( sigma, tau ) ) or ( IsSubset( tau, sigma ) and Length( tau ) > Length( sigma ) ) then 
+                            
+                                return zero_matrix;
+                                
+                            fi;
+                            
+                            if tau = sigma then 
+                            
+                                return d[ 1 ][ 2 ];
+                                
+                            fi;
+                            
+                            lambda := ShallowCopy( sigma );
+                            
+                            SubtractSet( lambda, tau );
+                            
+                            m := Position( basis_indices, lambda );
+                            
+                            return  ( RingElement( tau, S )*( RingElement( lambda, S ) )/e_sigma )*d[ m ][ 2 ];
+                            
+                            end ), UnionOfRows );
+                     
+end );
 
 
+DeclareGlobalFunction( "F2" );
+InstallGlobalFunction( F2,
+
+ function( sigma, A, B )
+ 
+ local R, r,s, AA, BB, Is_Kronecker_AA, BB_Kronecker_Ir; 
+ 
+ R := A!.ring;
+ 
+ r := NrRows( A );
+ s := NrColumns( B );
+ 
+ AA := FLeft( sigma, A );
+ BB := FRight( sigma, B );
+ 
+ Is_Kronecker_AA :=  KroneckerMat( HomalgIdentityMatrix( s, R ), AA );
+ BB_Kronecker_Ir :=  KroneckerMat( HomalgTransposedMat( BB ), HomalgIdentityMatrix( r, R ) );
+ 
+ return UnionOfColumns( Is_Kronecker_AA, BB_Kronecker_Ir );
+ 
+ end );
 
 
+DeclareGlobalFunction( "F3" );
+InstallGlobalFunction( F3, 
+
+function( A, B )
+local S, n, basis_indices;
+
+S := A!.ring;
+n := Length( IndeterminatesOfExteriorRing( S ) )-1;
+basis_indices := MyList( n );
+
+return UnionOfRows( List( basis_indices, sigma -> F2( sigma, A, B ) ) );
+
+end );
 
 
-# R := KoszulDualRing( HomalgFieldOfRationalsInSingular()*"x,y,z,w,t" );
-# l := MyList( 4 );
-# f := RingElementConstructor( R );                                          
+DeclareGlobalFunction( "SolveTwoSidedEquationOverExteriorAlgebra" );
+InstallGlobalFunction( SolveTwoSidedEquationOverExteriorAlgebra,
+
+function( A, B, C )
+local vec_C, CC_over, N, sol, Q;
+
+Q := CoefficientsRing( A!.ring ); 
+
+CC_over := UnionOfRows( List( DecompositionOfHomalgMat( C ), l->l[ 2 ] ) ); 
+
+vec_C := Q*UnionOfRows( List( [ 1.. NrColumns( C ) ], i-> CertainColumns( CC_over, [ i ] ) ) );
+
+N := Q*F3( A, B );
+
+sol := LeftDivide( N, vec_C );
+
+return sol;
+
+end );
+########################################
 
 
-
-
-
+ 
+ 
+ 
+ 
+ 
+ 
+ 
