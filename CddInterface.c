@@ -33,22 +33,9 @@ char* A2String(int *n, int size)
 
 void dd_SetLinearity(dd_MatrixPtr, char *);
 
-dd_MatrixPtr ddG_CanonicalizeMatrix( dd_MatrixPtr M)
-{
-  dd_MatrixPtr N=M;
-  dd_rowset impl_linset, redset;
-  dd_rowindex newpos;
-  dd_ErrorType err;
-  dd_MatrixCanonicalize(&N, &impl_linset, &redset, &newpos, &err);
-  
-  return N;
-}
-
-
 dd_MatrixPtr ddG_PolyInput2Matrix (int k_rep, int k_numtype,int k_linearity, dd_rowrange k_rowrange, 
                          dd_colrange k_colrange,char k_linearity_array[dd_linelenmax],char k_matrix[dd_linelenmax],
                          int str_len, int k_LPobject, char k_rowvec[dd_linelenmax])
-                                  
 {
 char numbtype[dd_linelenmax], k_value[dd_linelenmax], k_matrixx[str_len],k_linearity_arrayx[dd_linelenmax], k_rowvecx[dd_linelenmax];
 dd_MatrixPtr M=NULL;
@@ -144,10 +131,6 @@ dd_MatrixPtr M=NULL;
   return M;
 }
 
-
-
-
-
 dd_LPSolutionPtr ddG_LPSolutionPtr( dd_MatrixPtr M )
 {
   static dd_ErrorType err=dd_NoError;
@@ -165,7 +148,6 @@ dd_LPSolutionPtr ddG_LPSolutionPtr( dd_MatrixPtr M )
   
 }
 
-
 dd_rowrange ddG_RowSize( dd_MatrixPtr M)
 {
   return M-> rowsize;
@@ -180,8 +162,6 @@ dd_rowset ddG_RowSet( dd_MatrixPtr M )
 {
   return M->linset;
 }
-
-
 
 int ddG_LinearitySize( dd_MatrixPtr M )
 {
@@ -201,7 +181,6 @@ int ddG_LinearitySize( dd_MatrixPtr M )
     return u;
 }
   
-
 int * ddG_LinearityPtr(dd_MatrixPtr M )
 {
   dd_rowrange r;
@@ -221,8 +200,6 @@ int * ddG_LinearityPtr(dd_MatrixPtr M )
     
     return lin_array;
 }
-
-
 
 long int * ddG_RowVecPtr( dd_MatrixPtr M )
 {
@@ -457,6 +434,7 @@ static dd_MatrixPtr GapInputToMatrixPtr( Obj input )
    Obj string = ELM_PLIST( input , 7 );
    int str_len = GET_LEN_STRING( string );
    char k_matrix[ str_len ];
+   strcpy( k_linearity_array, PLIST_STR( ELM_PLIST( input , 6 ) ) );
   if (k_numtype==3) 
    strcpy( k_matrix,          PLIST_STR( ELM_PLIST( input , 7 ) ) );
   else 
@@ -465,7 +443,6 @@ static dd_MatrixPtr GapInputToMatrixPtr( Obj input )
    strcpy( k_matrix,          RATPLIST_STR( ELM_PLIST( input , 7 ) ) );
   }
 //     ErrorMayQuit( "hey kamalo", 0, 0 );
-  strcpy( k_linearity_array, PLIST_STR( ELM_PLIST( input , 6 ) ) );
   strcpy( k_rowvec,          RATPLIST_STR( ELM_PLIST( input , 9 ) ) );
 //     ErrorMayQuit( "hey kamalo", 0, 0 );
   return ddG_PolyInput2Matrix( k_rep , k_numtype, k_linearity, k_rowrange, k_colrange, k_linearity_array, k_matrix, str_len, k_LPobject, k_rowvec  );
@@ -688,27 +665,15 @@ static Obj CddInterface_Canonicalize( Obj self,Obj main )
   static dd_MatrixPtr M,A;
   char d[dd_linelenmax];
   Obj linearity_array;
-//   dd_ErrorType err=dd_NoError;
-//  dd_PolyhedraPtr poly;
   dd_set_global_constants();
-//   M =ddG_PolyInput2Matrix(2, 3, 1, 3, 3, " 2 1 3 " , " 1 1 1 0 1 1 0 2 2 ", 1, " 4 7 8 " );
+//    M =ddG_PolyInput2Matrix(2, 3, 1, 3, 3, " 2 1 3 " , " 1 1 1 0 1 1 0 2 2 ", 1, " 4 7 8 " );
+//    M= ddG_PolyInput2Matrix( 1,2,0,2,3, " ", " 0 1 1 0 -1 -1 ", 20, 0, " ");
   M= GapInputToMatrixPtr( main );
-  
-  
-  
   dd_rowset impl_linset, redset;
   dd_rowindex newpos;
   dd_ErrorType err;
   dd_MatrixCanonicalize(&M, &impl_linset, &redset, &newpos, &err);
-  dd_free_global_constants();
   return MatPtrToGapObj( M );
-  
-//   return INTOBJ_INT( 3 );
-//     M= GapInputToMatrixPtr( main );
-//   M= ddG_CanonicalizeMatrix( M );
-//   linearity_array = ELM_PLIST( main, 4 );
-//   strcpy( d, PLIST_STR(linearity_array) );
-  
 }
 
 static Obj CddInterface_Compute_H_rep( Obj self, Obj main )
@@ -724,7 +689,7 @@ static Obj CddInterface_Compute_H_rep( Obj self, Obj main )
    dd_rowset impl_linset, redset;
   dd_rowindex newpos;
 //   dd_ErrorType err;
-  dd_MatrixCanonicalize(&M, &impl_linset, &redset, &newpos, &err);
+//   dd_MatrixCanonicalize(&M, &impl_linset, &redset, &newpos, &err);
   
    poly=dd_DDMatrix2Poly(M, &err);
    A= A=dd_CopyInequalities(poly);
@@ -803,7 +768,13 @@ static Obj CddInterface_LpSolution( Obj self, Obj main )
     return INTOBJ_INT( 0 ); 
    
 }
-  
+
+static Obj take_poly_and_give_it_back( Obj self, Obj main )
+{ 
+  dd_WriteMatrix( stdout, GapInputToMatrixPtr( main ) );
+
+  return INTOBJ_INT( 0 );
+}
 /******************************************************************/
 
 typedef Obj (* GVarFunc)(/*arguments*/);
@@ -829,7 +800,7 @@ static StructGVarFunc GVarFuncs [] = {
     GVAR_FUNC_TABLE_ENTRY("CddInterface.c", CddInterface_FourierElimination, 1, "main"),
     
     
-//     GVAR_FUNC_TABLE_ENTRY("CddInterface.c", take_poly_and_give_it_back, 1, "list"),
+    GVAR_FUNC_TABLE_ENTRY("CddInterface.c", take_poly_and_give_it_back, 1, "list"),
     
     { 0 } /* Finish with an empty entry */
 
