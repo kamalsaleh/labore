@@ -1,4 +1,8 @@
 LoadPackage( "RingsForHomalg" );
+LoadPackage( "LinearAlgebra" );
+LoadPackage( "ModulePresentations" );
+
+
 
 ## function to compute the standard trasnpose of a homalg matrix
 
@@ -255,3 +259,81 @@ Y_ := Sum( List( [ 1..2^l ], i-> (R*CertainColumns( YY_, [ ( i - 1 )*n + 1 .. i*
 return [ X_, Y_ ];
 
 end );
+
+
+ComputeAllSolutionsOfTwoSidedEquationOverExteriorAlgebra :=
+
+function( A, B, C )
+local C_deco, C_deco_list, C_deco_list_vec, C_vec, N, sol, Q, R, l, m, s, r, n, 
+        XX, YY, XX_, YY_, X_, Y_, basis_indices, i, S, aa,bb,a_,b_,aa_,bb_, K;
+
+if NrRows( A )= 0 or NrColumns( A ) = 0 then 
+
+   return [ "optional", RightDivide( C, B ) ];
+   
+elif NrRows( B )= 0 or NrColumns( B ) = 0 then 
+
+   return [ LeftDivide( A, C ), "optional" ];
+   
+fi;
+
+R := HomalgRing( A );
+
+l := Length( IndeterminatesOfExteriorRing( R ) );
+
+basis_indices := standard_list_of_basis_indices( l-1 );
+
+Q := CoefficientsRing( R ); 
+
+C_deco := DecompositionOfHomalgMat( C );
+
+C_deco_list := List( C_deco, i-> i[ 2 ] );
+
+C_deco_list_vec := List( C_deco_list, c-> UnionOfRows( List( [ 1..NrColumns( C ) ], i-> CertainColumns( c, [ i ] ) ) ) );
+
+C_vec := Q*UnionOfRows( C_deco_list_vec );
+
+N := Q*FF3( A, B );
+
+sol := LeftDivide( N, C_vec );
+
+if sol = fail then 
+
+  return fail;
+  
+fi;
+
+S := SyzygiesOfColumns( N );
+
+r := NrRows( A );
+m := NrColumns( A );
+s := NrColumns( C );
+n := NrRows( B );
+
+XX := CertainRows( sol, [ 1..m*s*2^l ] );
+
+YY := CertainRows( sol, [ 1+ m*s*2^l ..( m*s+r*n)*2^l] );
+
+
+XX_ := UnionOfColumns( List( [ 1 .. s ], i -> CertainRows( XX, [ ( i - 1 )*m*2^l + 1 .. i*m*2^l ] ) ) );
+YY_ := UnionOfColumns( List( [ 1 .. n*2^l ], i -> CertainRows( YY, [ ( i - 1 )*r + 1 .. i*r ] ) ) );
+
+X_ := Sum( List( [ 1..2^l ], i-> ( R*CertainRows( XX_, [ ( i - 1 )*m + 1 .. i*m ] ) )* ring_element( basis_indices[ i ], R ) ) );
+Y_ := Sum( List( [ 1..2^l ], i-> (R*CertainColumns( YY_, [ ( i - 1 )*n + 1 .. i*n ] ) )* ring_element( basis_indices[ i ], R ) ) );
+
+K := [ ];
+for i in [ 1 .. NrColumns( S ) ] do
+    sol := CertainColumns( S, [i] );
+    aa := CertainRows( sol, [ 1..m*s*2^l ] );
+    bb := CertainRows( sol, [ 1+ m*s*2^l ..( m*s+r*n)*2^l] );
+    aa_ := UnionOfColumns( List( [ 1 .. s ], i -> CertainRows( aa, [ ( i - 1 )*m*2^l + 1 .. i*m*2^l ] ) ) );
+    bb_ := UnionOfColumns( List( [ 1 .. n*2^l ], i -> CertainRows( bb, [ ( i - 1 )*r + 1 .. i*r ] ) ) );
+
+    a_ := Sum( List( [ 1..2^l ], i-> ( R*CertainRows( aa_, [ ( i - 1 )*m + 1 .. i*m ] ) )* ring_element( basis_indices[ i ], R ) ) );
+    b_ := Sum( List( [ 1..2^l ], i-> (R*CertainColumns( bb_, [ ( i - 1 )*n + 1 .. i*n ] ) )* ring_element( basis_indices[ i ], R ) ) );
+    Add( K, [ a_,b_] );
+od;
+
+return [ [ X_, Y_ ], K ];
+
+end;
