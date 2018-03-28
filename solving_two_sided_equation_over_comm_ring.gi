@@ -125,8 +125,19 @@ InstallMethod( SolveTwoSidedEquationSystemOverCommutativeRing,
   
 end );
 
+# The following function finds elements x_1,....,x_n in the commutative ring R such that 
+# x1*l[1] + ... + x_n*l[n] = C mod B, i.e., 
+# such that the equation x1*l[1] + ... + x_n*l[n] +Z*B = C is solvable.
+# n is length of l.
+solve := 
+  function( l, B, C, R)
+  local vec, main; 
 
+  vec := function( H ) return Iterated( List( [ 1 .. NrColumns( H ) ], i -> CertainColumns( H, [ i ] ) ), UnionOfRows ); end;
+  main := UnionOfColumns( Iterated( List( l,vec ), UnionOfColumns ), KroneckerMat( HomalgIdentityMatrix(NrColumns( C ), R ), B ) ); 
+  return CertainRows( LeftDivide( main, vec(C)), [ 1 .. Length( l ) ] );
 
+end;
 
 # Example of a two sided equation over Q[ x,y ]
 
